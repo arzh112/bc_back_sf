@@ -24,7 +24,7 @@ class Order
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $deposit = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $pickUp = null;
 
     #[ORM\Column]
@@ -127,30 +127,6 @@ class Order
     public function setMessage(?string $message): static
     {
         $this->message = $message;
-
-        return $this;
-    }
-
-    public function getClient(): ?User
-    {
-        return $this->client;
-    }
-
-    public function setClient(?User $client): static
-    {
-        $this->client = $client;
-
-        return $this;
-    }
-
-    public function getEmployee(): ?User
-    {
-        return $this->employee;
-    }
-
-    public function setEmployee(?User $employee): static
-    {
-        $this->employee = $employee;
 
         return $this;
     }
