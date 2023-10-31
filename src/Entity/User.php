@@ -47,15 +47,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Order::class)]
-    private Collection $cOrders;
+    private Collection $clientOrders;
 
     #[ORM\OneToMany(mappedBy: 'employee', targetEntity: Order::class)]
-    private Collection $eOrders;
+    private Collection $employeeOrders;
 
     public function __construct()
     {
-        $this->cOrders = new ArrayCollection();
-        $this->eOrders = new ArrayCollection();
+        $this->clientOrders = new ArrayCollection();
+        $this->employeeOrders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -191,27 +191,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Order>
      */
-    public function getCOrders(): Collection
+    public function getClientOrders(): Collection
     {
-        return $this->cOrders;
+        return $this->clientOrders;
     }
 
-    public function addCOrder(Order $cOrder): static
+    public function addClientOrder(Order $clientOrder): static
     {
-        if (!$this->cOrders->contains($cOrder)) {
-            $this->cOrders->add($cOrder);
-            $cOrder->setClient($this);
+        if (!$this->clientOrders->contains($clientOrder)) {
+            $this->clientOrders->add($clientOrder);
+            $clientOrder->setClient($this);
         }
 
         return $this;
     }
 
-    public function removeCOrder(Order $cOrder): static
+    public function removeClientOrder(Order $clientOrder): static
     {
-        if ($this->cOrders->removeElement($cOrder)) {
+        if ($this->clientOrders->removeElement($clientOrder)) {
             // set the owning side to null (unless already changed)
-            if ($cOrder->getClient() === $this) {
-                $cOrder->setClient(null);
+            if ($clientOrder->getClient() === $this) {
+                $clientOrder->setClient(null);
             }
         }
 
@@ -221,27 +221,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Order>
      */
-    public function getEOrders(): Collection
+    public function getEmployeeOrders(): Collection
     {
-        return $this->eOrders;
+        return $this->employeeOrders;
     }
 
-    public function addEOrder(Order $eOrder): static
+    public function addEmployeeOrder(Order $employeeOrder): static
     {
-        if (!$this->eOrders->contains($eOrder)) {
-            $this->eOrders->add($eOrder);
-            $eOrder->setEmployee($this);
+        if (!$this->employeeOrders->contains($employeeOrder)) {
+            $this->employeeOrders->add($employeeOrder);
+            $employeeOrder->setEmployee($this);
         }
 
         return $this;
     }
 
-    public function removeEOrder(Order $eOrder): static
+    public function removeEmployeeOrder(Order $employeeOrder): static
     {
-        if ($this->eOrders->removeElement($eOrder)) {
+        if ($this->employeeOrders->removeElement($employeeOrder)) {
             // set the owning side to null (unless already changed)
-            if ($eOrder->getEmployee() === $this) {
-                $eOrder->setEmployee(null);
+            if ($employeeOrder->getEmployee() === $this) {
+                $employeeOrder->setEmployee(null);
             }
         }
 

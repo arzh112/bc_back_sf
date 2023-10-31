@@ -36,11 +36,11 @@ class Order
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $message = null;
 
-    #[ORM\ManyToOne(inversedBy: 'cOrders')]
-    private ?User $client = null;
+    #[ORM\ManyToOne(inversedBy: 'clientOrders')]
+    private ?user $client = null;
 
-    #[ORM\ManyToOne(inversedBy: 'eOrders')]
-    private ?User $employee = null;
+    #[ORM\ManyToOne(inversedBy: 'employeeOrders')]
+    private ?user $employee = null;
 
     public function getId(): ?int
     {
@@ -127,6 +127,30 @@ class Order
     public function setMessage(?string $message): static
     {
         $this->message = $message;
+
+        return $this;
+    }
+
+    public function getClient(): ?user
+    {
+        return $this->client;
+    }
+
+    public function setClient(?user $client): static
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    public function getEmployee(): ?user
+    {
+        return $this->employee;
+    }
+
+    public function setEmployee(?user $employee): static
+    {
+        $this->employee = $employee;
 
         return $this;
     }
