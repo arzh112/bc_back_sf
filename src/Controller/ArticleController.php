@@ -102,7 +102,8 @@ class ArticleController extends AbstractController
         EntityManagerInterface $em,
         Article $currentArticle,
         ServiceRepository $serviceRepository,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
+        ValidatorInterface $validator
     ): JsonResponse {
 
         $article = $serializer->deserialize(
@@ -112,6 +113,12 @@ class ArticleController extends AbstractController
             [AbstractNormalizer::OBJECT_TO_POPULATE => $currentArticle]
         );
         // le paramêtre [AbstractNormalizer::OBJECT_TO_POPULATE] permet de désérialiser directement à l’intérieur de l’objet $currentArticle , qui correspond à l'article passé dans l’URL.
+
+        // On vérifie les erreurs
+        $errors = $validator->validate($article);
+        if ($errors->count() > 0) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'es pas valide");
+        }
 
         // Récupération de l'ensemble des données envoyées sous forme de tableau
         $content = $request->toArray();

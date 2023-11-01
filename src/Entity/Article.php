@@ -16,11 +16,11 @@ class Article
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getArticle"])]
+    #[Groups(['getArticle', 'getCategory'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getArticle"])]
+    #[Groups(['getArticle', 'getCategory'])]
     #[Assert\NotBlank(message: "Le nom de l'article est obligatoire")]
     private ?string $name = null;
 
