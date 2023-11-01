@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -14,15 +15,19 @@ class Article
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getArticle"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getArticle"])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["getArticle"])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(["getArticle"])]
     private ?int $price = null;
 
     #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'articles')]
