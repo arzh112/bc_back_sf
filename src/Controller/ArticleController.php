@@ -4,17 +4,20 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Repository\ArticleRepository;
+use App\Repository\CategoryRepository;
 use App\Repository\ServiceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ArticleController extends AbstractController
 {
@@ -36,6 +39,7 @@ class ArticleController extends AbstractController
     }
 
     #[Route('/api/articles/{id}', name: 'deleteArticle', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un article')]
     public function deleteArticle(Article $article, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($article);
@@ -44,14 +48,40 @@ class ArticleController extends AbstractController
     }
 
     #[Route('/api/articles', name: 'createArticle', methods: 'POST')]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un article')]
     public function createArticle(
-        Request $request, 
-        SerializerInterface $serializer, 
-        EntityManagerInterface $em, 
-        UrlGenerator $urlGenerator
-        ): JsonResponse
-    {
+        Request $request,
+        SerializerInterface $serializer,
+        EntityManagerInterface $em,
+        UrlGeneratorInterface $urlGenerator,
+        ValidatorInterface $validator,
+        ServiceRepository $serviceRepository,
+        CategoryRepository $categoryRepository
+    ): JsonResponse {
+
         $article = $serializer->deserialize($request->getContent(), Article::class, 'json');
+
+        // On vérifie les erreurs
+        $errors = $validator->validate($article);
+        if ($errors->count() > 0) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'es pas valide");
+        }
+
+        // Récupération de l'ensemble des données envoyées sous forme de tableau
+        $content = $request->toArray();
+
+        // Récupération de l'idService. S'il n'est pas défini, alors on met -1 par défaut.
+        $arrayIdService = $content['idService'] ?? -1;
+        $arrayIdCategory = $content['idCategory'] ?? -1;
+
+        // Pour chaque id dans les tableaux, on cherche l'entité correspondante et on l'ajoute à l'article
+        // Si "find" ne trouve pas l'article, alors null sera retourné.
+        foreach ($arrayIdService as $service) {
+            $article->addService($serviceRepository->find($service));
+        }
+        foreach ($arrayIdCategory as $category) {
+            $article->addCategory($categoryRepository->find($category));
+        }
 
         $em->persist($article);
         $em->flush();
@@ -65,20 +95,40 @@ class ArticleController extends AbstractController
     }
 
     #[Route('/api/articles', name: 'updateArticle', methods: 'PUT')]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour modifier un article')]
     public function updateArticle(
-        Request $request, 
-        SerializerInterface $serializer, 
-        EntityManagerInterface $em, 
-        Article $currentArticle
+        Request $request,
+        SerializerInterface $serializer,
+        EntityManagerInterface $em,
+        Article $currentArticle,
+        ServiceRepository $serviceRepository,
+        CategoryRepository $categoryRepository
     ): JsonResponse {
 
         $article = $serializer->deserialize(
-            $request->getContent(), 
-            Article::class, 
-            'json', 
+            $request->getContent(),
+            Article::class,
+            'json',
             [AbstractNormalizer::OBJECT_TO_POPULATE => $currentArticle]
         );
         // le paramêtre [AbstractNormalizer::OBJECT_TO_POPULATE] permet de désérialiser directement à l’intérieur de l’objet $currentArticle , qui correspond à l'article passé dans l’URL.
+
+        // Récupération de l'ensemble des données envoyées sous forme de tableau
+        $content = $request->toArray();
+
+        // Récupération de l'idService. S'il n'est pas défini, alors on met -1 par défaut.
+        $arrayIdService = $content['idService'] ?? -1;
+        $arrayIdCategory = $content['idCategory'] ?? -1;
+
+        // Pour chaque id dans les tableaux, on cherche l'entité correspondante et on l'ajoute à l'article
+        // Si "find" ne trouve pas l'article, alors null sera retourné.
+        foreach ($arrayIdService as $service) {
+            $article->addService($serviceRepository->find($service));
+        }
+        foreach ($arrayIdCategory as $category) {
+            $article->addCategory($categoryRepository->find($category));
+        }
+
         $em->persist($article);
         $em->flush();
 

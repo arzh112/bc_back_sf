@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -20,6 +21,7 @@ class Article
 
     #[ORM\Column(length: 255)]
     #[Groups(["getArticle"])]
+    #[Assert\NotBlank(message: "Le nom de l'article est obligatoire")]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
