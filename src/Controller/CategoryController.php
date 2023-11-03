@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class CategoryController extends AbstractController
 {
     #[Route('/api/categories', name: 'categories', methods: 'GET')]
-    public function getAllCategory(CategoryRepository $categoryRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllCategories(CategoryRepository $categoryRepository, SerializerInterface $serializer): JsonResponse
     {
         $categories = $categoryRepository->findAll();
         $jsonCategories = $serializer->serialize($categories, 'json', ["groups" => "getCategory"]);
@@ -42,13 +43,14 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/api/categories', name: 'createCategory', methods: 'POST')]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer une catégorie')]
     public function createCategory(Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
         $category = $serializer->deserialize($request->getContent(), Category::class, 'json');
 
         $errors = $validator->validate($category);
         if ($errors->count() > 0) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'es pas valide");
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
 
         $em->persist($category);
@@ -61,13 +63,14 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/api/categories/{id}', name: 'updateCategory', methods: 'PUT')]
-    public function updateCategory(Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, Category $currentCategory): JsonResponse
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour modifier une catégorie')]
+    public function updateCategory(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, Category $currentCategory, ValidatorInterface $validator): JsonResponse
     {
         $category = $serializer->deserialize($request->getContent(), Category::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentCategory]);
 
         $errors = $validator->validate($category);
         if ($errors->count() > 0) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'es pas valide");
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
 
         $em->persist($category);

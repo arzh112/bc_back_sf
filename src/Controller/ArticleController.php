@@ -64,7 +64,7 @@ class ArticleController extends AbstractController
         // On vérifie les erreurs
         $errors = $validator->validate($article);
         if ($errors->count() > 0) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'es pas valide");
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
 
         // Récupération de l'ensemble des données envoyées sous forme de tableau
@@ -106,6 +106,7 @@ class ArticleController extends AbstractController
         ValidatorInterface $validator
     ): JsonResponse {
 
+        
         $article = $serializer->deserialize(
             $request->getContent(),
             Article::class,
@@ -114,12 +115,10 @@ class ArticleController extends AbstractController
         );
         // le paramêtre [AbstractNormalizer::OBJECT_TO_POPULATE] permet de désérialiser directement à l’intérieur de l’objet $currentArticle , qui correspond à l'article passé dans l’URL.
 
-        // On vérifie les erreurs
         $errors = $validator->validate($article);
         if ($errors->count() > 0) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'es pas valide");
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
-
         // Récupération de l'ensemble des données envoyées sous forme de tableau
         $content = $request->toArray();
 
