@@ -18,15 +18,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['getOrder'])]
+    #[Groups(['getOrder', 'getUser'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['getOrder'])]
+    #[Groups(['getOrder', 'getUser'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['getOrder'])]
+    #[Groups(['getOrder', 'getUser'])]
     private array $roles = [];
 
     /**
@@ -36,21 +36,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['getOrder'])]
+    #[Groups(['getUser'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['getOrder'])]
+    #[Groups(['getUser'])]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['getUser'])]
     private ?\DateTimeInterface $birthdate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['getUser'])]
     private ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['getOrder'])]
+    #[Groups(['getUser'])]
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Order::class)]

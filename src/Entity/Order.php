@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\OrderRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -13,34 +14,44 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['getOrder'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getOrder'])]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['getOrder'])]
     private ?\DateTimeInterface $payment = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['getOrder'])]
     private ?\DateTimeInterface $deposit = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['getOrder'])]
     private ?\DateTimeInterface $pickUp = null;
 
     #[ORM\Column]
+    #[Groups(['getOrder'])]
     private array $content = [];
 
     #[ORM\Column]
+    #[Groups(['getOrder'])]
     private ?int $totalPrice = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['getOrder'])]
     private ?string $message = null;
 
     #[ORM\ManyToOne(inversedBy: 'clientOrders')]
-    private ?user $client = null;
+    #[Groups(['getOrder'])]
+    private ?User $client = null;
 
     #[ORM\ManyToOne(inversedBy: 'employeeOrders')]
-    private ?user $employee = null;
+    #[Groups(['getOrder'])]
+    private ?User $employee = null;
 
     public function getId(): ?int
     {

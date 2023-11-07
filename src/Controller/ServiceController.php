@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ServiceController extends AbstractController
 {
-    #[Route('/api/services', name: 'services')]
+    #[Route('/api/services', name: 'services', methods: 'GET')]
     public function getAllService(ServiceRepository $serviceRepository, SerializerInterface $serializer): JsonResponse
     {
         $services = $serviceRepository->findAll();

@@ -10,8 +10,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -43,14 +44,19 @@ class UserController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/api/users', name: 'createUser', methods: 'POST')]
-    public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGenerator $urlGenerator, ValidatorInterface $validator)
+    #[Route('/api/users/new', name: 'createUser', methods: 'POST')]
+    public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator)
     {
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $validator->validate($user);
         if ($errors->count() > 0) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
+
+        $content = $request->toArray();
+        $plainPassword = $content['password'];
+        $hashPassword = $hasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hashPassword);
 
         $em->persist($user);
         $em->flush();
@@ -61,13 +67,21 @@ class UserController extends AbstractController
 
     }
 
-    #[Route('/api/users', name: 'updateUser', methods: 'PUT')]
-    public function updateUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, User $currentUser, ValidatorInterface $validator)
+    #[Route('/api/users/{id}', name: 'updateUser', methods: 'PUT')]
+    public function updateUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, User $currentUser, UserPasswordHasherInterface $hasher, ValidatorInterface $validator, UserRepository $userRepository)
     {
         $user = $serializer->deserialize($request->getContent(), User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUser]);
         $errors = $validator->validate($user);
         if ($errors->count() > 0) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
+        }
+
+        $content = $request->toArray();
+        $plainPassword = $content['plainPassword'] ?? null;
+
+        if($plainPassword !== null) {
+            $hashPassword = $hasher->hashPassword($user, $plainPassword);
+            $userRepository->upgradePassword($user, $hashPassword);
         }
 
         $em->persist($user);

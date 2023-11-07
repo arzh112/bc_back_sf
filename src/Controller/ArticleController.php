@@ -70,17 +70,21 @@ class ArticleController extends AbstractController
         // Récupération de l'ensemble des données envoyées sous forme de tableau
         $content = $request->toArray();
 
-        // Récupération de l'idService. S'il n'est pas défini, alors on met -1 par défaut.
-        $arrayIdService = $content['idService'] ?? -1;
-        $arrayIdCategory = $content['idCategory'] ?? -1;
+        // Récupération de l'idService. S'il n'est pas défini
+        $arrayIdService = $content['idService'] ?? null;
+        $arrayIdCategory = $content['idCategory'] ?? null;
 
         // Pour chaque id dans les tableaux, on cherche l'entité correspondante et on l'ajoute à l'article
         // Si "find" ne trouve pas l'article, alors null sera retourné.
-        foreach ($arrayIdService as $service) {
-            $article->addService($serviceRepository->find($service));
+        if($arrayIdService !== null) {
+            foreach ($arrayIdService as $service) {
+                $article->addService($serviceRepository->find($service));
+            }
         }
-        foreach ($arrayIdCategory as $category) {
-            $article->addCategory($categoryRepository->find($category));
+        if($arrayIdCategory !== null) {
+            foreach ($arrayIdCategory as $category) {
+                $article->addCategory($categoryRepository->find($category));
+            }
         }
 
         $em->persist($article);
@@ -94,7 +98,7 @@ class ArticleController extends AbstractController
         return new JsonResponse($jsonArticle, Response::HTTP_CREATED, ['location' => $location], true);
     }
 
-    #[Route('/api/articles', name: 'updateArticle', methods: 'PUT')]
+    #[Route('/api/articles/{id}', name: 'updateArticle', methods: 'PUT')]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour modifier un article')]
     public function updateArticle(
         Request $request,
@@ -123,16 +127,19 @@ class ArticleController extends AbstractController
         $content = $request->toArray();
 
         // Récupération de l'idService. S'il n'est pas défini, alors on met -1 par défaut.
-        $arrayIdService = $content['idService'] ?? -1;
-        $arrayIdCategory = $content['idCategory'] ?? -1;
+        $arrayIdService = $content['idService'] ?? null;
+        $arrayIdCategory = $content['idCategory'] ?? null;
 
-        // Pour chaque id dans les tableaux, on cherche l'entité correspondante et on l'ajoute à l'article
         // Si "find" ne trouve pas l'article, alors null sera retourné.
-        foreach ($arrayIdService as $service) {
-            $article->addService($serviceRepository->find($service));
+        if($arrayIdService !== null) {
+            foreach ($arrayIdService as $service) {
+                $article->addService($serviceRepository->find($service));
+            }
         }
-        foreach ($arrayIdCategory as $category) {
-            $article->addCategory($categoryRepository->find($category));
+        if($arrayIdCategory !== null) {
+            foreach ($arrayIdCategory as $category) {
+                $article->addCategory($categoryRepository->find($category));
+            }
         }
 
         $em->persist($article);

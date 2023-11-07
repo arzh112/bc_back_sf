@@ -15,15 +15,15 @@ class Service
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getArticle"])]
+    #[Groups(['getArticle', 'getService'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["getArticle"])]
+    #[Groups(['getArticle', 'getService'])]
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(["getArticle"])]
+    #[Groups(['getArticle', 'getService'])]
     private ?int $price = null;
 
     #[ORM\ManyToMany(targetEntity: Article::class, mappedBy: 'services')]
