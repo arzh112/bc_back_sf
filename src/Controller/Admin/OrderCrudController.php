@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Order;
+use App\Repository\UserRepository;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -30,7 +31,7 @@ class OrderCrudController extends AbstractCrudController
     {
 
         return [
-            IdField::new('id')->hideOnForm(),
+            IdField::new('id')->setFormTypeOption('disabled','disabled'),
             ChoiceField::new('status')
             ->renderAsBadges([
                 'waiting' => 'danger',
@@ -50,9 +51,11 @@ class OrderCrudController extends AbstractCrudController
                 ->setFormTypeOption('by_reference', false)
                 ->setCrudController(UserCrudController::class),
             AssociationField::new('employee')
+                ->autocomplete()
                 ->setCrudController(UserCrudController::class),
                 // ->setQueryBuilder(fn (QueryBuilder $qb) => $qb
-                //     ->andWhere('entity.roles = "ROLE_EMPLOYEE"')
+                //     ->select('entity')
+                //     ->where('"ROLE_EMPLOYEE" IN(entity.roles)')
                 // ),
             DateTimeField::new('deposit'),
             DateTimeField::new('pickUp'),
@@ -64,7 +67,10 @@ class OrderCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)            
+            ->setPermission(Action::NEW, 'ROLE_ADMIN')
+            ->setPermission(Action::DELETE, 'ROLE_ADMIN')
+            ->setPermission(Action::EDIT, 'ROLE_EMPLOYEE')
         ;
     }
 }

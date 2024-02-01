@@ -31,12 +31,6 @@ security:
                 target: app_login
             access_denied_url: app_login
 
-            remember_me:
-                secret: '%kernel.secret%'
-                lifetime: 604800
-                path: /
-                always_remember_me: true
-
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -55,12 +49,15 @@ security:
             stateless: true
             jwt: ~
 
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_EMPLOYEE, ROLE_USER]
+        ROLE_EMPLOYEE: ROLE_USER
+        
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/admin, roles: ROLE_EMPLOYEE }
+        - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_EMPLOYEE] }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: POST }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
