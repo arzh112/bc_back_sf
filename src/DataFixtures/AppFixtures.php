@@ -60,6 +60,12 @@ class AppFixtures extends Fixture
         "blanchiment",
         "nettoyage"
     ];
+    private const STATUS = [
+        "waiting",
+        "preparing",
+        "ready",
+        "collected"
+    ];
 
     public function __construct()
     {
@@ -111,7 +117,7 @@ class AppFixtures extends Fixture
         foreach(self::ARTICLES as $element) {
             $article = new Article;
             $article->setName($element);
-            $article->setPrice(200);
+            $article->setPrice($faker->numberBetween(200, 500));
             $manager->persist($article);
         }
 
@@ -119,7 +125,7 @@ class AppFixtures extends Fixture
         foreach(self::SERVICES as $element) {
             $service = new Service;
             $service->setName($element);
-            $service->setPrice(200);
+            $service->setPrice($faker->numberBetween(500, 2000));
             $manager->persist($service);
         }
 
@@ -127,13 +133,13 @@ class AppFixtures extends Fixture
             $order = new Order();
             $content = ["article" => "veste", "service" => "lavage à sec", "price" => 50, "number" => 1];
             $order->setContent($content)
-                ->setStatus("En cours")
+                ->setStatus($faker->randomElement(self::STATUS))
                 ->setClient($faker->randomElement($clients))
                 ->setEmployee($faker->randomElement($employees))
                 ->setDeposit($faker->dateTimeBetween('-3 days', 'now'))
                 ->setPickUp($faker->dateTimeBetween('-1 days', '+3 days'))
                 ->setMessage($faker->realText(20))
-                ->setTotalPrice($faker->randomNumber(2))
+                ->setTotalPrice($faker->numberBetween(1000, 5000))
                 ->setPayment($faker->dateTimeBetween('-3 days', '-2 days'));
             $manager->persist($order);
         }

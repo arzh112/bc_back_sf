@@ -3,8 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Order;
-use App\Repository\UserRepository;
-use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -16,9 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Faker\Core\Number;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class OrderCrudController extends AbstractCrudController
 {
@@ -33,18 +28,18 @@ class OrderCrudController extends AbstractCrudController
         return [
             IdField::new('id')->setFormTypeOption('disabled','disabled'),
             ChoiceField::new('status')
-            ->renderAsBadges([
-                'waiting' => 'danger',
-                'preparing' => 'warning',
-                'ready' => 'primary',
-                'collected' => 'success',
-            ])
-            ->setChoices([
-                'En attente' => 'waiting',
-                'En cours' => 'preparing',
-                'Prête' => 'ready',
-                'Récupérée' => 'collected'
-            ]),
+                ->renderAsBadges([
+                    'waiting' => 'danger',
+                    'preparing' => 'warning',
+                    'ready' => 'primary',
+                    'collected' => 'success',
+                ])
+                ->setChoices([
+                    'En attente' => 'waiting',
+                    'En cours' => 'preparing',
+                    'Prête' => 'ready',
+                    'Récupérée' => 'collected'
+                ]),
             ArrayField::new('content')->hideOnForm(),
             TextEditorField::new('message')->hideOnForm(),
             AssociationField::new('client')->hideOnForm()
@@ -59,7 +54,11 @@ class OrderCrudController extends AbstractCrudController
                 // ),
             DateTimeField::new('deposit'),
             DateTimeField::new('pickUp'),
-            NumberField::new('totalPrice')->onlyOnDetail(),
+            NumberField::new('totalPrice')->onlyOnDetail()
+                ->formatValue(function ($value) {
+                    $euroValue = $value / 100;
+                    return number_format($euroValue, 2, ',', ' ') . ' €';
+                }),
             DateTimeField::new('payment')->onlyOnDetail()
         ];
     }

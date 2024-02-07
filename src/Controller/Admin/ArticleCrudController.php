@@ -26,7 +26,11 @@ class ArticleCrudController extends AbstractCrudController
             IdField::new('id')->hideOnForm(),
             TextField::new('name'),
             TextEditorField::new('description')->hideOnIndex(),
-            NumberField::new('price'),
+            NumberField::new('price')
+                ->formatValue(function ($value) {
+                    $euroValue = $value / 100;
+                    return number_format($euroValue, 2, ',', ' ') . ' €';
+                }),
             AssociationField::new('services'),
             AssociationField::new('categories')
 

@@ -26,7 +26,10 @@ class ServiceCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             TextField::new('name'),
-            NumberField::new('price'),
+            NumberField::new('price')->formatValue(function ($value) {
+                $euroValue = $value / 100;
+                return number_format($euroValue, 2, ',', ' ') . ' €';
+            }),
             TextEditorField::new('description')->hideOnIndex(),
             AssociationField::new('articles')
                 ->setFormTypeOption('by_reference', false)
