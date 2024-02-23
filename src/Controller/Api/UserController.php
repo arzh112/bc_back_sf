@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -20,11 +19,17 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UserController extends AbstractController
 {
+
     #[Route('/api/users', name: 'users', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN', message: "Vous n'avez pas les droits suffisants")]
+    // #[IsGranted('ROLE_ADMIN', message: "Vous n'avez pas les droits suffisants")]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
-        $users = $userRepository->findAll();
+        // Si l'utilisateur à le rôle admin renvoyer tous les utilisateurs, sinon renvoyer uniquement l'utilisateur authentifié.
+        if(in_array("ROLE_ADMIN", $this->getUser()->getRoles())) {
+            $users = $userRepository->findAll();
+        } else {
+            $users = $userRepository->findOneBy(['email' => $this->getUser()->getUserIdentifier()]);
+        }
         $jsonUsers = $serializer->serialize($users, 'json', ["groups" => "getUser"]);
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
@@ -32,7 +37,8 @@ class UserController extends AbstractController
     #[Route('/api/users/{id}', name: 'detailUser', methods: ['GET'])]
     public function getOneUser(User $user, SerializerInterface $serializer): JsonResponse
     {
-        if($this->getUser()->getUserIdentifier() !== $user || $this->getUser()->getRoles() !== "ROLE_ADMIN") {
+        // Si l'utilisateur demandé n'est pas l'utilisateur authentifié et si l'utilisateur authentifié n'as pas le rôle admin.
+        if($this->getUser()->getUserIdentifier() !== $user->getEmail() && !in_array("ROLE_ADMIN", $this->getUser()->getRoles())) {
             throw new HttpException(Response::HTTP_UNAUTHORIZED, "Accès non autorisé");
         }
         $jsonUser = $serializer->serialize($user, 'json', ["groups" => "getUser"]);
@@ -42,7 +48,8 @@ class UserController extends AbstractController
     #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
     public function deleteUser(User $user, EntityManagerInterface $em): JsonResponse
     {
-        if($this->getUser()->getUserIdentifier() !== $user || $this->getUser()->getRoles() !== "ROLE_ADMIN") {
+        // Si l'utilisateur demandé n'est pas l'utilisateur authentifié et si l'utilisateur authentifié n'as pas le rôle admin.
+        if($this->getUser()->getUserIdentifier() !== $user->getEmail() && !in_array("ROLE_ADMIN", $this->getUser()->getRoles())) {
             throw new HttpException(Response::HTTP_UNAUTHORIZED, "Accès non autorisé");
         }
         $em->remove($user);
@@ -51,7 +58,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/users', name: 'createUser', methods: 'POST')]
-    public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator)
+    public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator)
     {
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $validator->validate($user);
@@ -60,9 +67,10 @@ class UserController extends AbstractController
         }
 
         $content = $request->toArray();
-        $plainPassword = $content['password'];
-        $hashPassword = $hasher->hashPassword($user, $plainPassword);
-        $user->setPassword($hashPassword);
+        // Cette ligne était utilisé avant la mise en place du userlistener permettant de hasher les mots de passes
+        // $hashPassword = $hasher->hashPassword($user, $plainPassword);
+        $password = $content['password'];
+        $user->setPassword($password);
 
         $em->persist($user);
         $em->flush();
@@ -73,9 +81,10 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/users/{id}', name: 'updateUser', methods: 'PUT')]
-    public function updateUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, User $currentUser, UserPasswordHasherInterface $hasher, ValidatorInterface $validator, UserRepository $userRepository)
+    public function updateUser(Request $request, User $user, SerializerInterface $serializer, EntityManagerInterface $em, User $currentUser, ValidatorInterface $validator, UserRepository $userRepository)
     {
-        if($this->getUser()->getUserIdentifier() !== $currentUser || $this->getUser()->getRoles() !== "ROLE_ADMIN") {
+        // Si l'utilisateur demandé n'est pas l'utilisateur authentifié et si l'utilisateur authentifié n'as pas le rôle admin.
+        if($this->getUser()->getUserIdentifier() !== $user->getEmail() && !in_array("ROLE_ADMIN", $this->getUser()->getRoles())) {
             throw new HttpException(Response::HTTP_UNAUTHORIZED, "Accès non autorisé");
         }
         $user = $serializer->deserialize($request->getContent(), User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUser]);
@@ -85,11 +94,12 @@ class UserController extends AbstractController
         }
 
         $content = $request->toArray();
-        $plainPassword = $content['password'] ?? null;
+        $password = $content['password'] ?? null;
 
-        if ($plainPassword !== null) {
-            $hashPassword = $hasher->hashPassword($user, $plainPassword);
-            $userRepository->upgradePassword($user, $hashPassword);
+        if ($password !== null) {
+            // Cette ligne était utilisé avant la mise en place du userlistener permettant de hasher les mots de passes
+            // $hashPassword = $hasher->hashPassword($user, $password);
+            $userRepository->upgradePassword($user, $password);
         }
 
         $em->persist($user);

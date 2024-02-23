@@ -61,10 +61,10 @@ class AppFixtures extends Fixture
         "nettoyage"
     ];
     private const STATUS = [
-        "waiting",
-        "preparing",
-        "ready",
-        "collected"
+        "En attente",
+        "En préparation",
+        "prête",
+        "récupérée"
     ];
 
     public function __construct()
@@ -116,16 +116,17 @@ class AppFixtures extends Fixture
         // Fixtures les articles
         foreach(self::ARTICLES as $element) {
             $article = new Article;
-            $article->setName($element);
-            $article->setPrice($faker->numberBetween(200, 500));
+            $article->setName($element)
+                ->setPrice($faker->numberBetween(200, 500));
             $manager->persist($article);
         }
 
         // Fixtures les services
         foreach(self::SERVICES as $element) {
             $service = new Service;
-            $service->setName($element);
-            $service->setPrice($faker->numberBetween(500, 2000));
+            $service->setName($element)
+                ->setPrice($faker->numberBetween(500, 2000))
+                ->setDescription($faker->realTextBetween(20, 100));
             $manager->persist($service);
         }
 

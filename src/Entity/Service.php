@@ -26,8 +26,13 @@ class Service
     #[Groups(['getArticle', 'getService'])]
     private ?int $price = null;
 
+    #[Groups(['getService'])]
     #[ORM\ManyToMany(targetEntity: Article::class, mappedBy: 'services')]
     private Collection $articles;
+
+    #[Groups(['getArticle', 'getService'])]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     public function __construct()
     {
@@ -91,6 +96,18 @@ class Service
         if ($this->articles->removeElement($article)) {
             $article->removeService($this);
         }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }

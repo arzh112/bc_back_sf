@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Order;
 use App\Repository\OrderRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,9 +21,17 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class OrderController extends AbstractController
 {
     #[Route('/api/orders', name: 'orders', methods: 'GET')]
-    public function getAllOrders(OrderRepository $orderRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllOrders(OrderRepository $orderRepository, UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
-        $orders = $orderRepository->findAll();
+        // Si l'utilisateur n'a pas le rôle admin la méthode getAllOrders ne retournera que les commandes de l'utilisateurs authetifié.
+        if(!in_array("ROLE_ADMIN", $this->getUser()->getRoles())) {
+            // Récupération de l'email de l'utilisateur authentifié.
+            $user = $userRepository->findOneBy(['email' => $this->getUser()->getUserIdentifier()]); 
+            // Récupération des commandes de l'utilisateur authentifié.
+            $orders = $orderRepository->findBy(['client' => $user]);
+        } else {
+            $orders = $orderRepository->findAll();
+        }
         $jsonOrders = $serializer->serialize($orders, 'json', ['groups' => 'getOrder']);
         return new JsonResponse($jsonOrders, Response::HTTP_OK, [], true);
     }

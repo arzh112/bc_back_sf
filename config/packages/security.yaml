@@ -15,7 +15,20 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        main:
+        api_login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            jwt: ~
+
+        form_login:
             lazy: true
             provider: app_user_provider
             form_login:
@@ -37,18 +50,6 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-        json_login:
-            pattern: ^/api
-            stateless: true
-            json_login:
-                check_path: /api/login_check
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-        api:
-            pattern:   ^/api
-            stateless: true
-            jwt: ~
-
     role_hierarchy:
         ROLE_ADMIN: [ROLE_EMPLOYEE, ROLE_USER]
         ROLE_EMPLOYEE: ROLE_USER
@@ -59,6 +60,8 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_EMPLOYEE] }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/services, roles: PUBLIC_ACCESS, methods: GET }
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: GET }
         - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: POST }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
