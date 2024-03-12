@@ -24,10 +24,10 @@ class UserController extends AbstractController
     // #[IsGranted('ROLE_ADMIN', message: "Vous n'avez pas les droits suffisants")]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
-        // Si l'utilisateur à le rôle admin renvoyer tous les utilisateurs, sinon renvoyer uniquement l'utilisateur authentifié.
+        // Si l'utilisateur à le rôle admin ajouter à $users tous les utilisateurs
         if(in_array("ROLE_ADMIN", $this->getUser()->getRoles())) {
             $users = $userRepository->findAll();
-        } else {
+        } else { // sinon ajouter à $users uniquement l'utilisateur authentifié.
             $users = $userRepository->findOneBy(['email' => $this->getUser()->getUserIdentifier()]);
         }
         $jsonUsers = $serializer->serialize($users, 'json', ["groups" => "getUser"]);
@@ -66,6 +66,13 @@ class UserController extends AbstractController
             throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
 
+        // Neutalisation des balises HTML
+        $user->setEmail(htmlspecialchars($user->getEmail()));
+        $user->setFirstname(htmlspecialchars($user->getFirstname()));
+        $user->setLastname(htmlspecialchars($user->getLastname()));
+        $user->setGender(htmlspecialchars($user->getGender()));
+        $user->setAddress(htmlspecialchars($user->getAddress()));
+
         $content = $request->toArray();
         // Cette ligne était utilisé avant la mise en place du userlistener permettant de hasher les mots de passes
         // $hashPassword = $hasher->hashPassword($user, $plainPassword);
@@ -92,6 +99,13 @@ class UserController extends AbstractController
         if ($errors->count() > 0) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, "La requête n'est pas valide");
         }
+
+        // Neutalisation des balises HTML
+        $user->setEmail(htmlspecialchars($user->getEmail()));
+        $user->setFirstname(htmlspecialchars($user->getFirstname()));
+        $user->setLastname(htmlspecialchars($user->getLastname()));
+        $user->setGender(htmlspecialchars($user->getGender()));
+        $user->setAddress(htmlspecialchars($user->getAddress()));
 
         $content = $request->toArray();
         $password = $content['password'] ?? null;

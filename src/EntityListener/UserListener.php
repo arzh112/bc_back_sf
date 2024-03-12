@@ -28,9 +28,7 @@ class UserListener
     {
         if($user->getPassword() === null) {
             return;
-        } 
-
+        }
         $user->setPassword($this->hasher->hashPassword($user, $user->getPassword()));
     }
-
 }

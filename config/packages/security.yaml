@@ -60,9 +60,9 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_EMPLOYEE] }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/services, roles: PUBLIC_ACCESS, methods: GET }
-        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: GET }
-        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: POST }
+        - { path: ^/api/services, roles: PUBLIC_ACCESS, methods: GET } 
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: GET } # Vérification directement dans la methode du contrôleur
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: POST } # Accès public pour permettre la création de compte
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 

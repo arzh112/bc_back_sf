@@ -6,6 +6,7 @@ use App\Repository\OrderRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -19,22 +20,27 @@ class Order
 
     #[ORM\Column(length: 255)]
     #[Groups(['getOrder'])]
+    #[Assert\NotBlank]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['getOrder'])]
+    #[Assert\NotBlank]
     private ?\DateTimeInterface $payment = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['getOrder'])]
+    #[Assert\NotBlank]
     private ?\DateTimeInterface $deposit = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['getOrder'])]
+    #[Assert\NotBlank]
     private ?\DateTimeInterface $pickUp = null;
 
     #[ORM\Column]
     #[Groups(['getOrder'])]
+    #[Assert\NotBlank]
     private array $content = [];
 
     #[ORM\Column]

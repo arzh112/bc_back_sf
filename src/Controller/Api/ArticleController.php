@@ -25,15 +25,17 @@ class ArticleController extends AbstractController
     #[Route('/api/articles', name: 'articles', methods: ['GET'])]
     public function getAllArticles(ArticleRepository $articleRepository, SerializerInterface $serializer): JsonResponse
     {
+        // récupération d'un tableau d'objet contenant tous les articles
         $articles = $articleRepository->findAll();
+        // sérialisation des objets articles au format JSON
         $jsonArticles = $serializer->serialize($articles, 'json', ["groups" => "getArticle"]);
+        // le return de la méthode retourne une réponse au format JSON avec le code de réponse HTTP
         return new JsonResponse($jsonArticles, Response::HTTP_OK, [], true);
     }
 
     #[Route('/api/articles/{id}', name: 'detailArticle', methods: ['GET'])]
     public function getOneArticle(Article $article, SerializerInterface $serializer): JsonResponse
     {
-        // $article = $articleRepository->find($articleUrl);
         $jsonArticle = $serializer->serialize($article, 'json', ["groups" => "getArticle"]);
         return new JsonResponse($jsonArticle, Response::HTTP_OK, [], true);
     }
@@ -42,6 +44,7 @@ class ArticleController extends AbstractController
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un article')]
     public function deleteArticle(Article $article, EntityManagerInterface $em): JsonResponse
     {
+        // utilisation de la méthode remove de l'entityManagerInterface
         $em->remove($article);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
@@ -59,6 +62,7 @@ class ArticleController extends AbstractController
         CategoryRepository $categoryRepository
     ): JsonResponse {
 
+        // On dé-sérialise l'objet JSON en objet PHP article
         $article = $serializer->deserialize($request->getContent(), Article::class, 'json');
 
         // On vérifie les erreurs
@@ -69,6 +73,9 @@ class ArticleController extends AbstractController
 
         // Récupération de l'ensemble des données envoyées sous forme de tableau
         $content = $request->toArray();
+
+        $article->setName(htmlspecialchars($article->getName()));
+        $article->setDescription(htmlspecialchars($article->getDescription()));
 
         // Récupération de l'idService. S'il n'est pas défini
         $arrayIdService = $content['idService'] ?? null;

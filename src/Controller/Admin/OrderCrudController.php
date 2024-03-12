@@ -29,16 +29,16 @@ class OrderCrudController extends AbstractCrudController
             IdField::new('id')->setFormTypeOption('disabled','disabled'),
             ChoiceField::new('status')
                 ->renderAsBadges([
-                    'waiting' => 'danger',
-                    'preparing' => 'warning',
-                    'ready' => 'primary',
-                    'collected' => 'success',
+                    'attente' => 'danger',
+                    'préparation' => 'warning',
+                    'prête' => 'primary',
+                    'récupérée' => 'success',
                 ])
                 ->setChoices([
-                    'En attente' => 'waiting',
-                    'En cours' => 'preparing',
-                    'Prête' => 'ready',
-                    'Récupérée' => 'collected'
+                    'En attente' => 'attente',
+                    'En cours' => 'préparation',
+                    'Prête' => 'prête',
+                    'Récupérée' => 'récupérée'
                 ]),
             ArrayField::new('content')->hideOnForm(),
             TextEditorField::new('message')->hideOnForm(),
@@ -47,11 +47,12 @@ class OrderCrudController extends AbstractCrudController
                 ->setCrudController(UserCrudController::class),
             AssociationField::new('employee')
                 ->autocomplete()
-                ->setCrudController(UserCrudController::class),
-                // ->setQueryBuilder(fn (QueryBuilder $qb) => $qb
-                //     ->select('entity')
-                //     ->where('"ROLE_EMPLOYEE" IN(entity.roles)')
-                // ),
+                ->setCrudController(UserCrudController::class)
+                ->setQueryBuilder(function ($queryBuilder) {
+                    return $queryBuilder                       
+                        ->andWhere('entity.roles LIKE :role')
+                        ->setParameter('role', "%ROLE_EMPLOYEE%");
+                }),
             DateTimeField::new('deposit'),
             DateTimeField::new('pickUp'),
             NumberField::new('totalPrice')->onlyOnDetail()

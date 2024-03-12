@@ -44,9 +44,10 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
+        // Méthode générative définissant les liens vers les pages de l'interface grâce au générateur yield.
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::linkToCrud('Orders', 'fas fa-ticket', Order::class);
-        yield MenuItem::linkToCrud('Users', 'fas fa-user', User::class);
+        yield MenuItem::linkToCrud('Commandes', 'fas fa-ticket', Order::class);
+        yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-user', User::class);
         yield MenuItem::linkToCrud('Services', 'fas fa-wash', Service::class);
         yield MenuItem::linkToCrud('Articles', 'fas fa-shirt', Article::class);
         yield MenuItem::linkToCrud('Categories', 'fas fa-list', Category::class);

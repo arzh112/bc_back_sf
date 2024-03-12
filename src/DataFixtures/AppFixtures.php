@@ -61,8 +61,8 @@ class AppFixtures extends Fixture
         "nettoyage"
     ];
     private const STATUS = [
-        "En attente",
-        "En préparation",
+        "attente",
+        "préparation",
         "prête",
         "récupérée"
     ];
@@ -80,7 +80,7 @@ class AppFixtures extends Fixture
         $admin = new User();
         $admin->setEmail(self::ADMIN_EMAIL)
             ->setPassword(self::ADMIN_PASSWORD)
-            ->setRoles(["ROLE_ADMIN"]);
+            ->setRoles(['ROLE_ADMIN']);
         $manager->persist($admin);
 
         $employees = [null];
@@ -88,7 +88,7 @@ class AppFixtures extends Fixture
             $employee = new User;
             $employee->setEmail($faker->email())
                 ->setPassword("test")
-                ->setRoles(["ROLE_EMPLOYEE"])
+                ->setRoles(['ROLE_EMPLOYEE'])
                 ->setFirstname($faker->firstName())
                 ->setLastname($faker->lastName());
             $employees[] = $employee;
@@ -113,19 +113,19 @@ class AppFixtures extends Fixture
             $manager->persist($category);
         }
 
-        // Fixtures les articles
+        // Fixtures des articles
         foreach(self::ARTICLES as $element) {
             $article = new Article;
             $article->setName($element)
-                ->setPrice($faker->numberBetween(200, 500));
+                ->setPrice($faker->numberBetween(50, 200));
             $manager->persist($article);
         }
 
-        // Fixtures les services
+        // Fixtures des services
         foreach(self::SERVICES as $element) {
             $service = new Service;
             $service->setName($element)
-                ->setPrice($faker->numberBetween(500, 2000))
+                ->setPrice($faker->numberBetween(100, 500))
                 ->setDescription($faker->realTextBetween(20, 100));
             $manager->persist($service);
         }
